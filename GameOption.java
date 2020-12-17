@@ -6,7 +6,7 @@ public class GameOption {
 	
 	String categories;
 	int playerScore;
-	int [] diceNum = null;
+    public int[] diceNum;
 	
 	public int[] getDiceNum() {
 		return diceNum;
@@ -35,10 +35,10 @@ public class GameOption {
 		this.playerScore = score;
 	}
 	
-	public GameOption(String categories,int score, int [] diceNum) {
+	public GameOption(String categories,int score,int[] dies) {
 		super();
 		this.categories = categories;
 		this.playerScore = score;
-		this.diceNum = diceNum;
+		this.diceNum = dies;
 	}	
 }

@@ -2,14 +2,13 @@ package DSAassignmentYahtzee;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Stack;
 import java.util.regex.Pattern;
-
-import javax.swing.JLabel;
-
 import YahtzeeGame.Die;
 
 
@@ -24,15 +23,18 @@ public class OptionMenu implements YahtzeeGameInfo{
 	ArrayList<GameOption> optionlist;
 	int space = 0;
 	int playerScore = 0;
-	int[] diceNum = null;
+	Stack<Dies>dieNum;
 	String categories = null;
-	int rollLeft = 2;
+	int rollLeft;
+	
 	
 
 	//constructor
 	public OptionMenu() {
 		super();
 		optionlist = new ArrayList();
+		dieNum = new Stack();
+		
 	}
 	
 	//welcome menu
@@ -40,7 +42,7 @@ public class OptionMenu implements YahtzeeGameInfo{
 		System.out.print("Welcome to Yahtzee Game Option Menu \n");
 		System.out.println("___________________________________\n");
 		System.out.println("Choose option 1: Display Yahtzee Game Description");
-		System.out.println("Choose option 2: Choose Category and Add score");
+		System.out.println("Choose option 2: Roll Dice & choose Category / Add score");
 		System.out.println("Choose option 3: Search your score by Category");
 		System.out.println("Choose option 4: Review your score information");
 		System.out.println("Choose option 5: Update Your Game Category");
@@ -51,10 +53,10 @@ public class OptionMenu implements YahtzeeGameInfo{
 	public void gameInfo() {
 		System.out.println("\n"+"Yahtzee is a dice game made by Milton"
 				+ "Bradley (now owned by Hasbro), which was first marketed as "
-				+ "Yatzie by the National Association Service\nof Toledo Ohio,"
-				+ "in the early 1940s. It was marketed under the name of Yahtzee"
-				+ "by game entrepreneur Edwin S. Lowe in 1956.\nThe game is a development"
-				+ "of earlier dice games such as Poker Dice, Yacht and Generala."
+				+ "Yatzie by the\nNational Association Service of Toledo Ohio,"
+				+ "in the early 1940s. It was marketed under the name of Yahtzee\n"
+				+ "by game entrepreneur Edwin S. Lowe in 1956.The game is a development"
+				+ "of earlier dice games such as Poker Dice,\nYacht and Generala."
 				+ "It is also similar to Yatzy, which is popular in Scandinavia.\n");
 		
 		System.out.println("How to play Step by Step Guide");
@@ -72,19 +74,26 @@ public class OptionMenu implements YahtzeeGameInfo{
 			System.out.println("8 : FourKind  - Sum of all dice with at lest 4 same dice number");
 			System.out.println("9 : Yahtzee   - Sum of five same dice number");
 			System.out.println("10: Chance    - Sum of all five dice with any number");
-		
-		
-		
-		
+			
+			System.out.println("____________________________\n");
+			System.out.println("Step 1: Choose option 2 to start the game.");
+			System.out.println("Step 2: Once the game is started first set of five dice will be rolled automatically.\n"+
+								" Then if you like the numbers based on the category, Enter category name and add score");
+			System.out.println("Step 3: The dice can be rolled 3 times per round and the game will end after choosing 10 category or rule.");
+			System.out.println("Step 4: Choose Option 5: If you want to change the score in-case you accidenctly add wrong score, then");
+			System.out.println("Step 5: Choose Option 3: If you can view you score by category");
+			System.out.println("Step 6: Choose Option 4: If you want to view all your score in once and your Total score at the end of the game");
+			System.out.println("Note: You can't choose the same category(rule) twice in a same(one) game");
+				
 	}
 	
 	
 	public void categories() {
 		
-
+		rollLeft=2;
 		if(!isFull()) {
 			
-			
+			dieNum = new Stack<Dies>();
 			dicRoll();
 		    System.out.println();
 			boolean checkCat = false;
@@ -105,7 +114,9 @@ public class OptionMenu implements YahtzeeGameInfo{
 				for(int i = 0; i< optionlist.size(); i++) {
 						if(categories.equals(optionlist.get(i).categories)) {
 							System.out.println("This Category '"+categories+"' is already used!!");
-							doAnother();
+							if(doAnother()) {
+								categories();
+							}else choose();
 						}
 					}
 				
@@ -127,15 +138,14 @@ public class OptionMenu implements YahtzeeGameInfo{
 				}	
 			}
 			
-			
-			
-			
-			optionlist.add(new GameOption(categories,playerScore,diceNum));
+			optionlist.add(new GameOption(categories,playerScore,dieNum.pop().diceNum));
 			System.out.println("Your score is added by the category \n");
 			space++;
 			
 			if(doAnother()) {
 				categories();
+			}else {
+				choose();
 			}
 	
 		}
@@ -153,7 +163,8 @@ public class OptionMenu implements YahtzeeGameInfo{
 			for(GameOption itr : optionlist) {
 				if(itr.getCategories().equals(cat)) {
 					
-					System.out.println("Your score on "+cat+" is "+itr.getScore());
+					System.out.println();
+					System.out.println("Your score on '"+cat+"' is "+itr.getScore()+".\tDice Numbers:"+ Arrays.toString(itr.diceNum) );
 					found = true;
 					break;
 				}
@@ -177,12 +188,11 @@ public class OptionMenu implements YahtzeeGameInfo{
 		System.out.println("Overall Score Informations by categories");
 		System.out.println("________________________________________");
 		System.out.println("Category \t"+"Score"+"\t\t"+"Dice Num");
-		for(GameOption itr : optionlist) {
-				 HashSet<GameOption> opt = new HashSet<GameOption>(); 
-				   
-			       System.out.println(itr.getCategories() +"\t\t"+ itr.getScore()+"\t\t"+itr.diceNum); 
-			      
-				}
+		for(GameOption op:optionlist)
+		{
+			System.out.println(op.getCategories()+"\t\t"+op.getScore()+"\t\t"+Arrays.toString(op.getDiceNum()));
+		}
+		
 		int total = 0;
 		for(int i = 0; i < optionlist.size(); i++)
 		   total = total + optionlist.get(i).playerScore;
@@ -206,9 +216,11 @@ public class OptionMenu implements YahtzeeGameInfo{
 		boolean found = false;	
 		for(int i=0; i<optionlist.size(); i++) {
 			if(catUpd.equalsIgnoreCase(optionlist.get(i).categories)) {
-				System.out.println("Enter the new score value for this category :");
+				
+				System.out.print("Enter the new score value for this category :");
 				newScore = reader.nextInt();
 				optionlist.get(i).playerScore = newScore;
+				System.out.println("Your new Score on '"+catUpd+"' is '"+optionlist.get(i).playerScore);
 				found = true;
 				break;
 				}
@@ -218,7 +230,9 @@ public class OptionMenu implements YahtzeeGameInfo{
 				System.out.println("You must have enter the wrong category name!!");
 				updateCategories();
 			}
-			doAnother();
+			if(doAnother()) {
+				choose();
+			}
 		}
 
 	
@@ -233,6 +247,7 @@ public class OptionMenu implements YahtzeeGameInfo{
 		System.out.println();
 		System.out.print("Choose Option :");
 		String gameOption = reader.next();
+		System.out.println();
 		
 		switch(gameOption) {
 		case "1": gameInfo(); System.out.println(); break;
@@ -263,13 +278,12 @@ public class OptionMenu implements YahtzeeGameInfo{
 			System.out.println(); 
 			return true; 
 			
-		}else if(doAnother.equalsIgnoreCase("No")) {
-			exit();
-		}
-		else
-			System.out.println("Invalid Input! Please Type correctly");
-			doAnother();
+		}else if(doAnother.equalsIgnoreCase("No")){
 			return false;
+		}else
+			System.out.println("Invalid Input!");
+			doAnother();
+		return false;
 		
 	}
 	
@@ -291,38 +305,45 @@ public class OptionMenu implements YahtzeeGameInfo{
 			if((Pattern.matches("^[A-Za-z]*$", cat))){
 				return true;
 			}else
-				throw new Exception("Inputed Categories Type or Format is incorrect!! Please Try Again \n");
+				throw new Exception("Inputted Categories Type or Format is incorrect!! Please Try Again \n");
 			
 		}
 		
 		public boolean isScore(int playerScore) throws Exception{
 			
 			String pScore = Integer.toString(playerScore);
-			if((Pattern.matches("^([1-9]|[12][0-9]|3[0-2])", pScore))){
+			if((Pattern.matches("^([1-9]|[12][0-9]|3[0-2][0-9])", pScore))){
 				return true;
+			
+			}else if((Pattern.matches("[A-Za-z]$*", pScore))){
+				throw new Exception("Score can't be character value! Invlid Input !Please Try Again!");
+				
 			}
 			else
 			
-				throw new Exception("Score method is incorrect !  "+"Please Try Again");
+				throw new Exception("Input Score format is incorrect or Invalid Input!  "+"Please Try Again");
 				
 		};
 		
 		public void dicRoll() {
 			
-	        int [] diceNum = null;
-	        int[] dieNum = new int[5];	
+	        int [] diceNum = new int[5];	
 	        Random rand = new Random();
 	        
 	        for (int i = 0; i < 5; i++) {
 	     
 	        	int die = rand.nextInt(6)+1;
-	        	dieNum[i] = die;
-	        	System.out.print(dieNum[i]+"   ");
-	        	 
-	        }	
-//	        diceNum[optionlist.get(i)] = dieNum[0];
-//	        ;
-	        for(int i =0; i<rollLeft; i++) {
+	        	diceNum[i] = die;
+	        	System.out.print(diceNum[i]+"   ");	
+	        	
+	        }
+	        dieNum.push(new Dies(diceNum));
+	        reRoll();
+	        	
+	      };
+	       
+		public void reRoll() {
+				for(int i =0; i<rollLeft; i++) {
 	        	
 	        	System.out.println();
 	        	System.out.println("Roll left = "+rollLeft);
@@ -335,8 +356,7 @@ public class OptionMenu implements YahtzeeGameInfo{
 	        	}else {
 	        		break;
 	        	}
-	        	
-	      }
-	        
-		}
+			}
+		};
+		
 	}
